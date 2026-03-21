@@ -3,4 +3,6 @@ project(KernelPerceptron)
 
 set(CMAKE_CXX_STANDARD 20)
 
-add_executable(KernelPerceptron main.cpp)
+add_executable(KernelPerceptron main.cpp
+        TrainingSample.cpp
+        TrainingSample.h)
