@@ -4,12 +4,13 @@
 #include <vector>
 #include <string>
 
-#include "TrainingSample.h"
+#include "PerceptronClassifier.h"
+#include "Sample.h"
 
 
 using namespace std;
 
-vector<TrainingSample> trainingSet;
+vector<Sample> trainingSet;
 
 
 vector<string> split(const string &s, char delimiter)
@@ -37,7 +38,7 @@ vector<string> split(const string &s, char delimiter)
 void loadTrainingSet()
 {
 
-        string fullFilePath = "";
+        string fullFilePath = "C:\\Users\\DerWiggler01\\CLionProjects\\KernelPerceptron\\Dataset_Linear.txt";
 
         cout << fullFilePath << endl;
         ifstream MyReadFile(fullFilePath);
@@ -65,7 +66,7 @@ void loadTrainingSet()
             //Last number in line is treated as label
             double label = stod(sample[sample.size()-1]);
 
-            TrainingSample t(features,label);
+            Sample t(features,label);
             trainingSet.push_back(t);
             for(int i = 0;i<t.getFeatureVector().size();i++)
             {
@@ -80,13 +81,12 @@ void loadTrainingSet()
 
 }
 
-void trainPerceptron()
-{
-
-}
 
 int main() {
     std::cout << "Hello, World!" << std::endl;
     loadTrainingSet();
+    PerceptronClassifier c = PerceptronClassifier(trainingSet);
+    cout << "Training completed" << endl;
+    getchar();
     return 0;
 }

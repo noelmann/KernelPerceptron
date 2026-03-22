@@ -2,11 +2,11 @@
 // Created by DerWiggler01 on 18.03.2026.
 //
 
-#ifndef KERNELPERCEPTRON_TRAININGSAMPLE_H
-#define KERNELPERCEPTRON_TRAININGSAMPLE_H
+#ifndef KERNELPERCEPTRON_SAMPLE_H
+#define KERNELPERCEPTRON_SAMPLE_H
 
 #include <vector>
-class TrainingSample
+class Sample
 {
     private:
     double label;
@@ -16,8 +16,8 @@ class TrainingSample
     public:
     double getLabel() const;
     std::vector<double> getFeatureVector();
-    TrainingSample(const std::vector<double>& features, double label);
+    Sample(const std::vector<double>& features, double label);
 };
 
 
-#endif //KERNELPERCEPTRON_TRAININGSAMPLE_H
+#endif //KERNELPERCEPTRON_SAMPLE_H
