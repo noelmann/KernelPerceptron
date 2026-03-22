@@ -11,13 +11,15 @@
 class PerceptronClassifier
 {
 public:
-    PerceptronClassifier(std::vector<Sample> trainingSamples);
+    PerceptronClassifier(std::vector<Sample> trainingSamples, bool useRBFkernel);
     double classify(Sample t);
-    std::unordered_map<Sample,double> partialError;
+    std::vector<std::pair<Sample,double>> partialError;
 private:
     double getPartialError(Sample t);
     void incrementPartialError(Sample t, double e);
     bool checkIfClassifierIsPerfect();
+    double getRBFkernelScalarProduct(Sample s1, Sample s2);
+    bool useRBF;
 
 };
 

@@ -38,7 +38,7 @@ vector<string> split(const string &s, char delimiter)
 void loadTrainingSet()
 {
 
-        string fullFilePath = "C:\\Users\\DerWiggler01\\CLionProjects\\KernelPerceptron\\Dataset_Linear.txt";
+        string fullFilePath = "C:\\Users\\DerWiggler01\\CLionProjects\\KernelPerceptron\\Dataset_Nonlinear.txt";
 
         cout << fullFilePath << endl;
         ifstream MyReadFile(fullFilePath);
@@ -73,6 +73,7 @@ void loadTrainingSet()
                 cout<<t.getFeatureVector()[i] << " ";
 
             }
+            cout << "Label:" << t.getLabel() << endl;
 
         }
 
@@ -85,7 +86,7 @@ void loadTrainingSet()
 int main() {
     std::cout << "Hello, World!" << std::endl;
     loadTrainingSet();
-    PerceptronClassifier c = PerceptronClassifier(trainingSet);
+    PerceptronClassifier c = PerceptronClassifier(trainingSet,true);
     cout << "Training completed" << endl;
     getchar();
     return 0;

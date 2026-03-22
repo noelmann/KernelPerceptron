@@ -15,7 +15,7 @@ class Sample
 
     public:
     double getLabel() const;
-    std::vector<double> getFeatureVector();
+    const std::vector<double>& getFeatureVector() const;
     Sample(const std::vector<double>& features, double label);
 };
 

@@ -16,7 +16,7 @@ double Sample::getLabel() const
     return label;
 }
 
-std::vector<double> Sample::getFeatureVector()
+const std::vector<double>& Sample::getFeatureVector() const
 {
     return features;
 }

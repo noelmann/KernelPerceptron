@@ -3,12 +3,14 @@
 //
 
 #include "PerceptronClassifier.h"
+#include <cmath>
 
-PerceptronClassifier::PerceptronClassifier(std::vector<Sample> trainingSamples)
+PerceptronClassifier::PerceptronClassifier(std::vector<Sample> trainingSamples, bool useRBFkernel)
 {
+    useRBF= useRBFkernel;
     for (const auto& trainingSample : trainingSamples)
     {
-        partialError[trainingSample] = 0.0;
+        partialError.push_back({trainingSample, 0.0});
     }
 
     while (!checkIfClassifierIsPerfect())
@@ -23,15 +25,21 @@ PerceptronClassifier::PerceptronClassifier(std::vector<Sample> trainingSamples)
 
 double PerceptronClassifier::classify(Sample t)
 {
-    double classification;
-    double totalScalarProduct;
+
+    double totalScalarProduct = 0.0;
     for (const auto& entry : partialError)
     {
-        //classification+=entry.second*
 
-        for (int i = 0;i<entry.first.getFeatureVector().size();i++)
+        if (useRBF)
         {
-            totalScalarProduct+=getPartialError(entry.first)*entry.first.getFeatureVector()[i]*t.getFeatureVector()[i];
+            totalScalarProduct+= getPartialError(entry.first)*getRBFkernelScalarProduct(entry.first,t);
+        }
+        else
+        {
+            for (int i = 0;i<entry.first.getFeatureVector().size();i++)
+            {
+                totalScalarProduct+=getPartialError(entry.first)*entry.first.getFeatureVector()[i]*t.getFeatureVector()[i];
+            }
         }
     }
 
@@ -47,11 +55,23 @@ double PerceptronClassifier::classify(Sample t)
 
 double PerceptronClassifier::getPartialError(Sample t)
 {
-    return partialError[t];
+    for (const auto& entry : partialError)
+    {
+        if (entry.first.getFeatureVector() == t.getFeatureVector())
+            return entry.second;
+    }
+    return 0.0;
 }
 void PerceptronClassifier::incrementPartialError(Sample t, double e)
 {
-    partialError[t] += e;
+    for (auto& entry : partialError)
+    {
+        if (entry.first.getFeatureVector() == t.getFeatureVector())
+        {
+            entry.second += e;
+            return;
+        }
+    }
 }
 
 bool PerceptronClassifier::checkIfClassifierIsPerfect()
@@ -63,4 +83,20 @@ bool PerceptronClassifier::checkIfClassifierIsPerfect()
             return false;
         }
     }
+
+    return true;
+}
+
+double PerceptronClassifier::getRBFkernelScalarProduct(Sample s1, Sample s2)
+{
+    double squaredEuclideanDistance = 0.0;
+    double sigma = 1.0;
+    for (int i = 0;i<s1.getFeatureVector().size();i++)
+    {
+        squaredEuclideanDistance += pow((s1.getFeatureVector()[i]-s2.getFeatureVector()[i]),2);
+    }
+
+    squaredEuclideanDistance/=2*pow(1,2);
+
+    return (exp(-squaredEuclideanDistance));
 }
