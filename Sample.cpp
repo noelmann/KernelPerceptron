@@ -4,7 +4,7 @@
 
 #include "Sample.h"
 
-
+//holds the label and the feature vector of a sample
 Sample::Sample(const std::vector<double>& f, double l)
 {
     label = l;

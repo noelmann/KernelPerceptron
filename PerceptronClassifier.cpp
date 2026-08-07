@@ -23,6 +23,7 @@ PerceptronClassifier::PerceptronClassifier(std::vector<Sample> trainingSamples, 
     }
 }
 
+//classifies a given sample based on either a normal perceptron in its dual form or in combination with an RBF kernel to handle nonlinearity
 double PerceptronClassifier::classify(Sample t)
 {
 
@@ -53,6 +54,7 @@ double PerceptronClassifier::classify(Sample t)
     }
 }
 
+//returns the record of the error a specific sample had caused during training
 double PerceptronClassifier::getPartialError(Sample t)
 {
     for (const auto& entry : partialError)
@@ -62,6 +64,8 @@ double PerceptronClassifier::getPartialError(Sample t)
     }
     return 0.0;
 }
+
+//increases the record of the error a specific sample had caused during training
 void PerceptronClassifier::incrementPartialError(Sample t, double e)
 {
     for (auto& entry : partialError)
@@ -74,6 +78,7 @@ void PerceptronClassifier::incrementPartialError(Sample t, double e)
     }
 }
 
+//checks if the classifier makes no error(overfitting)
 bool PerceptronClassifier::checkIfClassifierIsPerfect()
 {
     for (const auto& entry : partialError)
@@ -87,6 +92,7 @@ bool PerceptronClassifier::checkIfClassifierIsPerfect()
     return true;
 }
 
+//calculates the scalar product of the feature vectors of two samples in a higher dimension using the RBF kernel
 double PerceptronClassifier::getRBFkernelScalarProduct(Sample s1, Sample s2)
 {
     double squaredEuclideanDistance = 0.0;
@@ -96,7 +102,7 @@ double PerceptronClassifier::getRBFkernelScalarProduct(Sample s1, Sample s2)
         squaredEuclideanDistance += pow((s1.getFeatureVector()[i]-s2.getFeatureVector()[i]),2);
     }
 
-    squaredEuclideanDistance/=2*pow(1,2);
+    squaredEuclideanDistance/=2*pow(sigma,2);
 
     return (exp(-squaredEuclideanDistance));
 }

@@ -12,7 +12,7 @@ using namespace std;
 
 vector<Sample> trainingSet;
 
-
+//splits the given string into multiple strings at the given character
 vector<string> split(const string &s, char delimiter)
 {
     vector<string> substrings;
@@ -34,11 +34,11 @@ vector<string> split(const string &s, char delimiter)
     return substrings;
 }
 
-
+//lodas the training data line by line and uses the last column as the label
 void loadTrainingSet()
 {
 
-        string fullFilePath = "C:\\Users\\DerWiggler01\\CLionProjects\\KernelPerceptron\\Dataset_Nonlinear.txt";
+        string fullFilePath = R"(D:\QT-Projekte\KernelPerceptron\Dataset_Nonlinear.txt)";
 
         cout << fullFilePath << endl;
         ifstream MyReadFile(fullFilePath);
