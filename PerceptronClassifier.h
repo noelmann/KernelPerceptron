@@ -15,10 +15,12 @@ public:
     double classify(Sample t);
     std::vector<std::pair<Sample,double>> partialError;
 private:
+    double heavisideFunction(const double &x);
     double getPartialError(Sample t);
     void incrementPartialError(Sample t, double e);
     bool checkIfClassifierIsPerfect();
-    double getRBFkernelScalarProduct(Sample s1, Sample s2);
+    double getRBFkernelScalarProduct(const Sample &s1, const Sample &s2);
+    double getPolynomialkernelScalarProduct(const Sample &s1, const Sample &s2);
     bool useRBF;
 
 };

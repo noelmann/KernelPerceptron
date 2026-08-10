@@ -66,7 +66,7 @@ void loadTrainingSet()
             //Last number in line is treated as label
             double label = stod(sample[sample.size()-1]);
 
-            Sample t(features,label);
+            Sample t(lineCount-1, features,label);
             trainingSet.push_back(t);
             for(int i = 0;i<t.getFeatureVector().size();i++)
             {

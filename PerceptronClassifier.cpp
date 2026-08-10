@@ -44,14 +44,7 @@ double PerceptronClassifier::classify(Sample t)
         }
     }
 
-    if (totalScalarProduct >= 0)
-    {
-        return 1;
-    }
-    else
-    {
-        return 0;
-    }
+    return heavisideFunction(totalScalarProduct);
 }
 
 //returns the record of the error a specific sample had caused during training
@@ -59,8 +52,10 @@ double PerceptronClassifier::getPartialError(Sample t)
 {
     for (const auto& entry : partialError)
     {
-        if (entry.first.getFeatureVector() == t.getFeatureVector())
+        if(entry.first.getIdentifier()==t.getIdentifier())
+        {
             return entry.second;
+        }
     }
     return 0.0;
 }
@@ -93,7 +88,7 @@ bool PerceptronClassifier::checkIfClassifierIsPerfect()
 }
 
 //calculates the scalar product of the feature vectors of two samples in a higher dimension using the RBF kernel
-double PerceptronClassifier::getRBFkernelScalarProduct(Sample s1, Sample s2)
+double PerceptronClassifier::getRBFkernelScalarProduct(const Sample &s1, const Sample &s2)
 {
     double squaredEuclideanDistance = 0.0;
     double sigma = 1.0;
@@ -105,4 +100,32 @@ double PerceptronClassifier::getRBFkernelScalarProduct(Sample s1, Sample s2)
     squaredEuclideanDistance/=2*pow(sigma,2);
 
     return (exp(-squaredEuclideanDistance));
+}
+
+
+////calculates the scalar product of the feature vectors of two samples in a higher dimension using a Polynomial kernel
+double PerceptronClassifier::getPolynomialkernelScalarProduct(const Sample &s1, const Sample &s2)
+{
+    double degree = 2.0;
+    double scalarProduct = 0.0;
+    for(int i =0;i<s1.getFeatureVector().size();i++)
+    {
+        scalarProduct+=(s1.getFeatureVector()[i]*s2.getFeatureVector()[i]);
+    }
+
+    scalarProduct+=1;
+
+    return pow(scalarProduct,degree);
+}
+
+double PerceptronClassifier::heavisideFunction(const double &x)
+{
+    if (x >= 0)
+    {
+        return 1;
+    }
+    else
+    {
+        return 0;
+    }
 }

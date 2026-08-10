@@ -7,4 +7,6 @@ add_executable(KernelPerceptron main.cpp
         Sample.cpp
         Sample.h
         PerceptronClassifier.cpp
-        PerceptronClassifier.h)
+        PerceptronClassifier.h
+        kernel_rbf.h kernel_rbf.cpp
+        kernel_polynomial.h kernel_polynomial.cpp)

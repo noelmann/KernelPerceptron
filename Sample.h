@@ -11,12 +11,14 @@ class Sample
     private:
     double label;
     std::vector<double> features;
+    int identifier;
 
 
     public:
     double getLabel() const;
+    int getIdentifier() const;
     const std::vector<double>& getFeatureVector() const;
-    Sample(const std::vector<double>& features, double label);
+    Sample(const int id, const std::vector<double>& features, double label);
 };
 
 
