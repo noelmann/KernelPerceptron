@@ -10,4 +10,6 @@ add_executable(KernelPerceptron main.cpp
         PerceptronClassifier.h
         kernel_rbf.h kernel_rbf.cpp
         kernel_polynomial.h kernel_polynomial.cpp
-        kernel_linear.h kernel_linear.cpp)
+        kernel_linear.h kernel_linear.cpp
+        kernel.h
+)

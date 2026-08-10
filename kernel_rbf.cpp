@@ -1,19 +1,21 @@
 #include "kernel_rbf.h"
 
-Kernel_RBF::Kernel_RBF(const double &sigma)
+kernel_rbf::kernel_rbf(const double &sigma)
 {
     setSigma(sigma);
 }
 
-double Kernel_RBF::getSigma()
+double kernel_rbf::getSigma()
 {
     return s;
 }
-void Kernel_RBF::setSigma(const double &sigma)
+void kernel_rbf::setSigma(const double &sigma)
 {
     s = sigma;
 }
-double Kernel_RBF::getScalarProduct(const std::vector<double> &v1, const std::vector<double> &v2)
+
+//calculates the scalar product of the feature vectors of two samples in a higher dimension using the RBF kernel
+double kernel_rbf::getScalarProduct(const std::vector<double> &v1, const std::vector<double> &v2) const
 {
     double squaredEuclideanDistance = 0.0;
     for (int i = 0;i<v1.size();i++)

@@ -6,6 +6,9 @@
 
 #include "PerceptronClassifier.h"
 #include "Sample.h"
+#include "kernel_rbf.h"
+#include "kernel_polynomial.h"
+#include "kernel_linear.h"
 
 
 using namespace std;
@@ -38,7 +41,7 @@ vector<string> split(const string &s, char delimiter)
 void loadTrainingSet()
 {
 
-        string fullFilePath = R"(D:\QT-Projekte\KernelPerceptron\Dataset_Nonlinear.txt)";
+        string fullFilePath = R"(D:\QT-Projekte\KernelPerceptron\Dataset_NonLinear.txt)";
 
         cout << fullFilePath << endl;
         ifstream MyReadFile(fullFilePath);
@@ -84,9 +87,12 @@ void loadTrainingSet()
 
 
 int main() {
-    std::cout << "Hello, World!" << std::endl;
+    std::cout << "Training started!" << std::endl;
     loadTrainingSet();
-    PerceptronClassifier c = PerceptronClassifier(trainingSet,true);
+    kernel_linear linear = kernel_linear();
+    kernel_polynomial polynomial = kernel_polynomial(2);
+    kernel_rbf rbf = kernel_rbf(1.0);
+    PerceptronClassifier c = PerceptronClassifier(trainingSet,rbf);
     cout << "Training completed" << endl;
     getchar();
     return 0;

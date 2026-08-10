@@ -5,9 +5,8 @@
 #include "PerceptronClassifier.h"
 #include <cmath>
 
-PerceptronClassifier::PerceptronClassifier(std::vector<Sample> trainingSamples, bool useRBFkernel)
+PerceptronClassifier::PerceptronClassifier(std::vector<Sample> trainingSamples, const kernel &kernel) : k(kernel)
 {
-    useRBF= useRBFkernel;
     for (const auto& trainingSample : trainingSamples)
     {
         partialError.push_back({trainingSample, 0.0});
@@ -30,18 +29,7 @@ double PerceptronClassifier::classify(Sample t)
     double totalScalarProduct = 0.0;
     for (const auto& entry : partialError)
     {
-
-        if (useRBF)
-        {
-            totalScalarProduct+= getPartialError(entry.first)*getRBFkernelScalarProduct(entry.first,t);
-        }
-        else
-        {
-            for (int i = 0;i<entry.first.getFeatureVector().size();i++)
-            {
-                totalScalarProduct+=getPartialError(entry.first)*entry.first.getFeatureVector()[i]*t.getFeatureVector()[i];
-            }
-        }
+        totalScalarProduct+= getPartialError(entry.first)*(k.getScalarProduct(entry.first.getFeatureVector(),t.getFeatureVector()));
     }
 
     return heavisideFunction(totalScalarProduct);
@@ -85,37 +73,6 @@ bool PerceptronClassifier::checkIfClassifierIsPerfect()
     }
 
     return true;
-}
-
-//calculates the scalar product of the feature vectors of two samples in a higher dimension using the RBF kernel
-double PerceptronClassifier::getRBFkernelScalarProduct(const Sample &s1, const Sample &s2)
-{
-    double squaredEuclideanDistance = 0.0;
-    double sigma = 1.0;
-    for (int i = 0;i<s1.getFeatureVector().size();i++)
-    {
-        squaredEuclideanDistance += pow((s1.getFeatureVector()[i]-s2.getFeatureVector()[i]),2);
-    }
-
-    squaredEuclideanDistance/=2*pow(sigma,2);
-
-    return (exp(-squaredEuclideanDistance));
-}
-
-
-////calculates the scalar product of the feature vectors of two samples in a higher dimension using a Polynomial kernel
-double PerceptronClassifier::getPolynomialkernelScalarProduct(const Sample &s1, const Sample &s2)
-{
-    double degree = 2.0;
-    double scalarProduct = 0.0;
-    for(int i =0;i<s1.getFeatureVector().size();i++)
-    {
-        scalarProduct+=(s1.getFeatureVector()[i]*s2.getFeatureVector()[i]);
-    }
-
-    scalarProduct+=1;
-
-    return pow(scalarProduct,degree);
 }
 
 double PerceptronClassifier::heavisideFunction(const double &x)
