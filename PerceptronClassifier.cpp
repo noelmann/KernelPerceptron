@@ -5,24 +5,26 @@
 #include "PerceptronClassifier.h"
 #include <cmath>
 
-PerceptronClassifier::PerceptronClassifier(std::vector<Sample> trainingSamples, const kernel &kernel) : k(kernel)
+PerceptronClassifier::PerceptronClassifier(std::vector<Sample> trainingSamples, const int &max_iterations, const kernel &kernel) : k(kernel)
 {
     for (const auto& trainingSample : trainingSamples)
     {
         partialError.push_back({trainingSample, 0.0});
     }
 
-    while (!checkIfClassifierIsPerfect())
+    while (!checkIfClassifierIsPerfect() && iterations < max_iterations)
     {
         for (const auto& trainingSample : trainingSamples)
         {
             double error = (trainingSample.getLabel()-classify(trainingSample));
             incrementPartialError(trainingSample,error);
         }
+
+        iterations++;
     }
 }
 
-//classifies a given sample based on either a normal perceptron in its dual form or in combination with an RBF kernel to handle nonlinearity
+//classifies a given sample using a dual form perceptron in combination with a given kernel(linear/polynomial/rbf)
 double PerceptronClassifier::classify(Sample t)
 {
 
@@ -32,7 +34,9 @@ double PerceptronClassifier::classify(Sample t)
         totalScalarProduct+= getPartialError(entry.first)*(k.getScalarProduct(entry.first.getFeatureVector(),t.getFeatureVector()));
     }
 
+
     return heavisideFunction(totalScalarProduct);
+
 }
 
 //returns the record of the error a specific sample had caused during training
@@ -85,4 +89,9 @@ double PerceptronClassifier::heavisideFunction(const double &x)
     {
         return 0;
     }
+}
+
+int PerceptronClassifier::getIterations()
+{
+    return iterations;
 }

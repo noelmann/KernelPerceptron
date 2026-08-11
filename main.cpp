@@ -8,6 +8,7 @@
 #include "Sample.h"
 #include "kernel_rbf.h"
 #include "kernel_polynomial.h"
+#include "kernel_sigmoid.h"
 #include "kernel_linear.h"
 
 
@@ -38,7 +39,7 @@ vector<string> split(const string &s, char delimiter)
 }
 
 //lodas the training data line by line and uses the last column as the label
-void loadTrainingSet()
+void loadTrainingSet(const double &bias)
 {
 
         string fullFilePath = R"(D:\QT-Projekte\KernelPerceptron\Dataset_NonLinear.txt)";
@@ -66,12 +67,14 @@ void loadTrainingSet()
                 //cout << stod(sample[i]) << endl;
             }
 
+            features.push_back(bias);
+
             //Last number in line is treated as label
             double label = stod(sample[sample.size()-1]);
 
             Sample t(lineCount-1, features,label);
             trainingSet.push_back(t);
-            for(int i = 0;i<t.getFeatureVector().size();i++)
+            for(int i = 0;i<t.getFeatureVector().size()-1;i++)
             {
                 cout<<t.getFeatureVector()[i] << " ";
 
@@ -79,6 +82,7 @@ void loadTrainingSet()
             cout << "Label:" << t.getLabel() << endl;
 
         }
+
 
         // Close the file
         MyReadFile.close();
@@ -88,12 +92,16 @@ void loadTrainingSet()
 
 int main() {
     std::cout << "Training started!" << std::endl;
-    loadTrainingSet();
+    loadTrainingSet(0);
     kernel_linear linear = kernel_linear();
     kernel_polynomial polynomial = kernel_polynomial(2);
-    kernel_rbf rbf = kernel_rbf(1.0);
-    PerceptronClassifier c = PerceptronClassifier(trainingSet,rbf);
+    kernel_rbf rbf = kernel_rbf(1);
+    kernel_sigmoid sigmoid = kernel_sigmoid(1,1);
+    PerceptronClassifier c = PerceptronClassifier(trainingSet,50,polynomial);
     cout << "Training completed" << endl;
+    cout << "Stopped training after " << c.getIterations() << " iterations." << std::endl;
+    cout << c.classify(trainingSet[0]) << endl;
+
     getchar();
     return 0;
 }

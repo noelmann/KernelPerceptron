@@ -12,15 +12,17 @@
 class PerceptronClassifier
 {
 public:
-    PerceptronClassifier(std::vector<Sample> trainingSamples, const kernel &kernel);
+    PerceptronClassifier(std::vector<Sample> trainingSamples, const int &max_iterations, const kernel &kernel);
     double classify(Sample t);
     std::vector<std::pair<Sample,double>> partialError;
+    int getIterations();
 private:
     double heavisideFunction(const double &x);
     double getPartialError(Sample t);
     void incrementPartialError(Sample t, double e);
     bool checkIfClassifierIsPerfect();
     const kernel &k;
+    int iterations = 0;
 
 };
 
