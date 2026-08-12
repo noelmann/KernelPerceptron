@@ -89,6 +89,47 @@ void loadTrainingSet(const double &bias)
 
 }
 
+double calculateAccuracy(PerceptronClassifier &classifier, const vector<Sample> &testset)
+{
+    double correctCounter = 0;
+    for(int i =0;i<testset.size();i++)
+    {
+        if(classifier.classify(testset[i]) == testset[i].getLabel())
+        {
+            //cout << classifier.classify(testset[i]) << endl;
+            correctCounter++;
+        }
+    }
+
+    return correctCounter/testset.size();
+}
+
+void tuneSigmoidKernel(double (&sigmoidParameters)[2], const vector<Sample> tuningSet)
+{
+    double bestAcc = 0.0;
+    double temp;
+    double stepSize = 0.01;
+    double a = sigmoidParameters[0];
+    double c = sigmoidParameters[1];
+    for(int x=1;x<100;x++)
+    {
+        for(int y=1;y<100;y++)
+        {
+            PerceptronClassifier classifier = PerceptronClassifier(tuningSet,100,kernel_sigmoid(a,c));
+            temp = calculateAccuracy(classifier,tuningSet);
+            if(temp > bestAcc)
+            {
+                bestAcc = temp;
+                sigmoidParameters[0] =a;
+                sigmoidParameters[1] =c;
+            }
+
+            a=x*stepSize;
+            c=y*stepSize;
+        }
+    }
+}
+
 
 int main() {
     std::cout << "Training started!" << std::endl;
@@ -96,12 +137,23 @@ int main() {
     kernel_linear linear = kernel_linear();
     kernel_polynomial polynomial = kernel_polynomial(2);
     kernel_rbf rbf = kernel_rbf(1);
-    kernel_sigmoid sigmoid = kernel_sigmoid(1,1);
-    PerceptronClassifier c = PerceptronClassifier(trainingSet,50,polynomial);
-    cout << "Training completed" << endl;
-    cout << "Stopped training after " << c.getIterations() << " iterations." << std::endl;
-    cout << c.classify(trainingSet[0]) << endl;
 
+    /*cout << "Training completed" << endl;
+    cout << "Stopped training after " << c.getIterations() << " iterations." << std::endl;
+    double acc = calculateAccuracy(c,trainingSet)*100;
+    cout << "Accuracy on training set: " << acc << "%" << endl;*/
+
+
+    cout << "Running hyperparameter tuning for sigmoid kernel." << endl;
+    double params[2] = {0.01,0.01};
+    tuneSigmoidKernel(params, trainingSet);
+    cout << "Best slope: " << params[0] << endl;
+    cout << "Best intercept: " << params[1] << endl;
+
+    kernel_sigmoid sigmoid = kernel_sigmoid(params[0],params[1]);
+    PerceptronClassifier c = PerceptronClassifier(trainingSet,100,sigmoid);
+    double acc = calculateAccuracy(c,trainingSet);
+    cout << "Accuracy on training set: " << acc << "%" << endl;
     getchar();
     return 0;
 }
