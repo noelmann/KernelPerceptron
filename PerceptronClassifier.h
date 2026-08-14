@@ -12,16 +12,20 @@
 class PerceptronClassifier
 {
 public:
-    PerceptronClassifier(std::vector<Sample> trainingSamples, const int &max_iterations, const kernel &kernel);
+    PerceptronClassifier(kernel &kernel);
     double classify(Sample t);
+    void train(const std::vector<Sample> &trainingSamples, const int &max_iterations);
+    void hyperParameterGridSearch(const std::vector<Sample> &tuningSamples, const int &max_iterations, double lowerBound, double upperBound, int steps);
     std::vector<std::pair<Sample,double>> partialError;
     int getIterations();
+    double calculateAccuracy(const std::vector<Sample> &testset);
+    kernel& getUsedKernel();
 private:
     double heavisideFunction(const double &x);
     double getPartialError(Sample t);
     void incrementPartialError(Sample t, double e);
     bool checkIfClassifierIsPerfect();
-    const kernel &k;
+    kernel &k;
     int iterations = 0;
 
 };

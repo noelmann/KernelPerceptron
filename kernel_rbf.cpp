@@ -27,3 +27,16 @@ double kernel_rbf::getScalarProduct(const std::vector<double> &v1, const std::ve
 
     return (exp(-squaredEuclideanDistance));
 }
+
+std::vector<double> kernel_rbf::getParameterVector() const
+{
+    std::vector<double> vec;
+    vec.emplace_back(s);
+
+    return vec;
+}
+
+void kernel_rbf::setParameterVector(std::vector<double> newParameters)
+{
+    setSigma(newParameters[0]);
+}

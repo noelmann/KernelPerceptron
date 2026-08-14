@@ -14,3 +14,14 @@ double kernel_linear::getScalarProduct(const std::vector<double> &v1, const std:
     }
     return scalarProduct;
 }
+
+std::vector<double> kernel_linear::getParameterVector() const
+{
+    std::vector<double> vec;
+    vec.emplace_back(0);
+    return vec;
+}
+
+void kernel_linear::setParameterVector(std::vector<double> newParameters)
+{
+}

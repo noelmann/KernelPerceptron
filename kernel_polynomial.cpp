@@ -27,3 +27,15 @@ double kernel_polynomial::getScalarProduct(const std::vector<double> &v1, const 
 
     return pow(scalarProduct,n);
 }
+
+std::vector<double> kernel_polynomial::getParameterVector() const
+{
+    std::vector<double> vec;
+    vec.emplace_back(n);
+    return vec;
+}
+
+void kernel_polynomial::setParameterVector(std::vector<double> newParameters)
+{
+    setDegree(newParameters[0]);
+}

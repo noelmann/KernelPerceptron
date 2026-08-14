@@ -4,9 +4,17 @@
 
 #include "PerceptronClassifier.h"
 #include <cmath>
+#include <iostream>
 
-PerceptronClassifier::PerceptronClassifier(std::vector<Sample> trainingSamples, const int &max_iterations, const kernel &kernel) : k(kernel)
+PerceptronClassifier::PerceptronClassifier(kernel &kernel) : k(kernel)
 {
+
+}
+
+void PerceptronClassifier::train(const std::vector<Sample> &trainingSamples, const int &max_iterations)
+{
+    partialError.clear();
+    iterations = 0;
     for (const auto& trainingSample : trainingSamples)
     {
         partialError.push_back({trainingSample, 0.0});
@@ -23,6 +31,53 @@ PerceptronClassifier::PerceptronClassifier(std::vector<Sample> trainingSamples, 
         iterations++;
     }
 }
+
+void PerceptronClassifier::hyperParameterGridSearch(const std::vector<Sample> &tuningSamples, const int &max_iterations, double lowerBound, double upperBound, int steps)
+{
+    double bestAccuracy = 0.0;
+    double acc = 0.0;
+    std::vector<double> bestVec = k.getParameterVector();
+    std::vector<double> vec = bestVec;
+    std::vector<double> parameterTestValues;
+
+    double param;
+    for(int i = 1;i<steps;i++)
+    {
+        param = lowerBound*(double)i;
+        if(param > upperBound)
+        {
+            break;
+        }
+        parameterTestValues.emplace_back(param);
+    }
+
+    train(tuningSamples,max_iterations);
+    bestAccuracy = calculateAccuracy(tuningSamples);
+
+
+    for(int i=0;i<parameterTestValues.size();i++)
+    {
+        for(int x =0;x<vec.size();x++)
+        {
+            vec[x] = parameterTestValues[i];
+        }
+        k.setParameterVector(vec);
+        train(tuningSamples,max_iterations);
+        acc = calculateAccuracy(tuningSamples);
+
+        if(acc > bestAccuracy)
+        {
+            bestAccuracy = acc;
+            bestVec = vec;
+        }
+
+    }
+
+    k.setParameterVector(bestVec);
+    train(tuningSamples,max_iterations);
+
+}
+
 
 //classifies a given sample using a dual form perceptron in combination with a given kernel(linear/polynomial/rbf)
 double PerceptronClassifier::classify(Sample t)
@@ -94,4 +149,23 @@ double PerceptronClassifier::heavisideFunction(const double &x)
 int PerceptronClassifier::getIterations()
 {
     return iterations;
+}
+
+kernel& PerceptronClassifier::getUsedKernel()
+{
+    return k;
+}
+
+double PerceptronClassifier::calculateAccuracy(const std::vector<Sample> &testset)
+{
+    double correctCounter = 0;
+    for(int i =0;i<testset.size();i++)
+    {
+        if(classify(testset[i]) == testset[i].getLabel())
+        {
+            correctCounter++;
+        }
+    }
+
+    return correctCounter/testset.size();
 }

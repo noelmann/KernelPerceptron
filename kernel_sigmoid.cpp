@@ -41,3 +41,17 @@ double kernel_sigmoid::getScalarProduct(const std::vector<double> &v1, const std
 
     return tanh(scalarProduct);
 }
+
+std::vector<double> kernel_sigmoid::getParameterVector() const
+{
+    std::vector<double> vec;
+    vec.emplace_back(a);
+    vec.emplace_back(c);
+    return vec;
+}
+
+void kernel_sigmoid::setParameterVector(std::vector<double> newParameters)
+{
+    setSlope(newParameters[0]);
+    setIntercept(newParameters[1]);
+}
