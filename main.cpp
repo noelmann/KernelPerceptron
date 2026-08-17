@@ -89,8 +89,73 @@ void loadTrainingSet(const double &bias)
 
 }
 
+struct Entry
+{
+    vector<double> values;
+};
 
-int main() {
+
+vector<Entry> generateCartesianProduct(vector<Entry> a,vector<Entry> b)
+{
+        vector<Entry> c;
+        for(int i=0;i<a.size();i++)
+        {
+            for(int j=0;j<b.size();j++)
+            {
+                struct Entry newEntry;
+                for(const auto &a_entryValue : a[i].values)
+                {
+                    newEntry.values.emplace_back(a_entryValue);
+                }
+                for(const auto &b_entryValue : b[j].values)
+                {
+                    newEntry.values.emplace_back(b_entryValue);
+                }
+
+                c.emplace_back(newEntry);
+            }
+        }
+
+        return c;
+}
+
+
+vector<Entry> generateHyperparameterSet(vector<Entry> a, int hyperParameterVariableCount)
+{
+    vector<Entry> entries = a;
+    for(int i=1;i<hyperParameterVariableCount;i++)
+    {
+        entries = generateCartesianProduct(a,entries);
+    }
+
+    return entries;
+}
+
+int main()
+{
+    vector<Entry> a;
+    for(int i=1;i<=2;i++)
+    {
+        struct Entry t;
+        t.values.emplace_back(i);
+        a.emplace_back(t);
+    }
+    vector<Entry> c = generateHyperparameterSet(a,3);
+
+    for(const auto &e: c)
+    {
+        string entry="";
+        for(const double &d :e.values)
+        {
+            entry += to_string(d) + " ";
+        }
+
+        cout << "|" << entry <<"|" << endl;
+    }
+
+    cout << "Totalcount:" << c.size() << endl;
+
+/*
     std::cout << "Training started!" << std::endl;
     loadTrainingSet(1);
     kernel_linear linear = kernel_linear();
@@ -101,7 +166,7 @@ int main() {
     PerceptronClassifier c = PerceptronClassifier(polynomial);
     c.hyperParameterGridSearch(trainingSet,100,1,10,10);
     cout << "Best n:" << c.getUsedKernel().getParameterVector()[0] << endl;
-    cout << "Accuracy: " << (c.calculateAccuracy(trainingSet)*100) << endl;
+    cout << "Accuracy: " << (c.calculateAccuracy(trainingSet)*100) << endl;*/
     getchar();
     return 0;
 }
