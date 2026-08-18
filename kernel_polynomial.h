@@ -10,9 +10,9 @@ private:
     double n;
 
 public:
-    kernel_polynomial(const int &degree);
+    kernel_polynomial(const double &degree);
     double getDegree();
-    void setDegree(const int &degree);
+    void setDegree(const double &degree);
     double getScalarProduct(const std::vector<double> &v1, const std::vector<double> &v2) const override;
     std::vector<double> getParameterVector() const override;
     void setParameterVector(std::vector<double> newParameters) override;

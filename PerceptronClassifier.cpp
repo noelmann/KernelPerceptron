@@ -4,11 +4,12 @@
 
 #include "PerceptronClassifier.h"
 #include <cmath>
-#include <iostream>
+#include "hyperparametergenerator.h"
 
 PerceptronClassifier::PerceptronClassifier(kernel &kernel) : k(kernel)
 {
-
+    partialError.clear();
+    iterations = 0;
 }
 
 void PerceptronClassifier::train(const std::vector<Sample> &trainingSamples, const int &max_iterations)
@@ -32,55 +33,44 @@ void PerceptronClassifier::train(const std::vector<Sample> &trainingSamples, con
     }
 }
 
-void PerceptronClassifier::hyperParameterGridSearch(const std::vector<Sample> &tuningSamples, const int &max_iterations, double lowerBound, double upperBound, int steps)
+void PerceptronClassifier::hyperParameterGridSearch(const std::vector<Sample> &trainingSamples,const std::vector<Sample> &developmentSamples, const int &max_iterations, double lowerBound, double upperBound, double stepSize)
 {
-    double bestAccuracy = 0.0;
-    double acc = 0.0;
-    std::vector<double> bestVec = k.getParameterVector();
-    std::vector<double> vec = bestVec;
-    std::vector<double> parameterTestValues;
+    double bestAccuracy = -0.1;
+    double acc = bestAccuracy;
+    std::vector<double> bestVec;
+    std::vector<double> vec;
+    std::vector<Entry> hyperParameterSet = HyperparameterGenerator::generateHyperparameterSet(k.getParameterVector().size(),lowerBound,upperBound,stepSize);
+    struct Entry standard;
+    standard.values = k.getParameterVector();
+    hyperParameterSet.insert(hyperParameterSet.begin(),standard);
 
-    double param;
-    for(int i = 1;i<steps;i++)
+    for(const struct Entry &e : hyperParameterSet)
     {
-        param = lowerBound*(double)i;
-        if(param > upperBound)
+        vec.clear();
+
+        for(const double &value : e.values)
         {
-            break;
+            vec.emplace_back(value);
         }
-        parameterTestValues.emplace_back(param);
-    }
 
-    train(tuningSamples,max_iterations);
-    bestAccuracy = calculateAccuracy(tuningSamples);
-
-
-    for(int i=0;i<parameterTestValues.size();i++)
-    {
-        for(int x =0;x<vec.size();x++)
-        {
-            vec[x] = parameterTestValues[i];
-        }
         k.setParameterVector(vec);
-        train(tuningSamples,max_iterations);
-        acc = calculateAccuracy(tuningSamples);
+
+        train(trainingSamples,max_iterations);
+        acc = calculateAccuracy(developmentSamples);
 
         if(acc > bestAccuracy)
         {
             bestAccuracy = acc;
             bestVec = vec;
         }
-
     }
-
     k.setParameterVector(bestVec);
-    train(tuningSamples,max_iterations);
-
+    train(trainingSamples,max_iterations);
 }
 
 
 //classifies a given sample using a dual form perceptron in combination with a given kernel(linear/polynomial/rbf)
-double PerceptronClassifier::classify(Sample t)
+double PerceptronClassifier::classify(const Sample &t)
 {
 
     double totalScalarProduct = 0.0;
@@ -95,7 +85,7 @@ double PerceptronClassifier::classify(Sample t)
 }
 
 //returns the record of the error a specific sample had caused during training
-double PerceptronClassifier::getPartialError(Sample t)
+double PerceptronClassifier::getPartialError(const Sample &t)
 {
     for (const auto& entry : partialError)
     {
@@ -108,11 +98,11 @@ double PerceptronClassifier::getPartialError(Sample t)
 }
 
 //increases the record of the error a specific sample had caused during training
-void PerceptronClassifier::incrementPartialError(Sample t, double e)
+void PerceptronClassifier::incrementPartialError(const Sample &t, const double e)
 {
     for (auto& entry : partialError)
     {
-        if (entry.first.getFeatureVector() == t.getFeatureVector())
+        if (entry.first.getIdentifier() == t.getIdentifier())
         {
             entry.second += e;
             return;

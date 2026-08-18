@@ -1,6 +1,6 @@
 #include "kernel_polynomial.h"
 
-kernel_polynomial::kernel_polynomial(const int &degree)
+kernel_polynomial::kernel_polynomial(const double &degree)
 {
     setDegree(degree);
 }
@@ -9,7 +9,7 @@ double kernel_polynomial::getDegree()
 {
     return n;
 }
-void kernel_polynomial::setDegree(const int &degree)
+void kernel_polynomial::setDegree(const double &degree)
 {
     n = degree;
 }

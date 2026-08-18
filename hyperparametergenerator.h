@@ -11,7 +11,7 @@ struct Entry
 class HyperparameterGenerator
 {
 public:
-    static std::vector<Entry> generateHyperparameterSet(std::vector<Entry> a, int hyperParameterVariableCount);
+    static std::vector<Entry> generateHyperparameterSet(int hyperParameterVariableCount , double lowerBound, double upperBound, double stepSize);
 
 private:
     static std::vector<Entry> generateCartesianProduct(std::vector<Entry> a, std::vector<Entry> b);

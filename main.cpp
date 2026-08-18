@@ -94,14 +94,7 @@ void loadTrainingSet(const double &bias)
 
 int main()
 {
-    vector<Entry> a;
-    for(int i=1;i<=3;i++)
-    {
-        struct Entry t;
-        t.values.emplace_back(i);
-        a.emplace_back(t);
-    }
-    vector<Entry> c = HyperparameterGenerator::generateHyperparameterSet(a,3);
+    /*vector<Entry> c = HyperparameterGenerator::generateHyperparameterSet(3,-3,3,0.5);
 
     for(const auto &e: c)
     {
@@ -114,20 +107,21 @@ int main()
         cout << "|" << entry <<"|" << endl;
     }
 
-    cout << "Totalcount:" << c.size() << endl;
+    cout << "Totalcount:" << c.size() << endl;*/
 
-/*
     std::cout << "Training started!" << std::endl;
     loadTrainingSet(1);
     kernel_linear linear = kernel_linear();
     kernel_polynomial polynomial = kernel_polynomial(1);
     kernel_rbf rbf = kernel_rbf(1);
-    kernel_sigmoid sigmoid = kernel_sigmoid(1,0.001);
+    kernel_sigmoid sigmoid = kernel_sigmoid(1,1);
 
-    PerceptronClassifier c = PerceptronClassifier(polynomial);
-    c.hyperParameterGridSearch(trainingSet,100,1,10,10);
-    cout << "Best n:" << c.getUsedKernel().getParameterVector()[0] << endl;
-    cout << "Accuracy: " << (c.calculateAccuracy(trainingSet)*100) << endl;*/
+    PerceptronClassifier c = PerceptronClassifier(sigmoid);
+    //c.train(trainingSet,100);
+    c.hyperParameterGridSearch(trainingSet,trainingSet,25,-5,5,0.01);
+    cout << "Best a:" << c.getUsedKernel().getParameterVector()[0]<< endl;
+    cout << "Best c:" << c.getUsedKernel().getParameterVector()[1] << endl;
+    cout << "Accuracy: " << (c.calculateAccuracy(trainingSet)*100) << endl;
     getchar();
     return 0;
 }
