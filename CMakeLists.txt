@@ -13,4 +13,5 @@ add_executable(KernelPerceptron main.cpp
         kernel_linear.h kernel_linear.cpp
         kernel.h
         kernel_sigmoid.h kernel_sigmoid.cpp
+        hyperparametergenerator.h hyperparametergenerator.cpp
 )
