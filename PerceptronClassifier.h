@@ -13,7 +13,7 @@ class PerceptronClassifier
 {
 public:
     PerceptronClassifier(kernel &kernel);
-    double classify(const Sample &t);
+    double classify(const Sample &t, const bool &useActivationFunction);
     void train(const std::vector<Sample> &trainingSamples, const int &max_iterations);
     void hyperParameterGridSearch(const std::vector<Sample> &trainingSamples,const std::vector<Sample> &developmentSamples, const int &max_iterations, double lowerBound, double upperBound, double stepSize);
     std::vector<std::pair<Sample,double>> partialError;

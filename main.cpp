@@ -11,6 +11,7 @@
 #include "kernel_sigmoid.h"
 #include "kernel_linear.h"
 #include "hyperparametergenerator.h"
+#include <map>
 
 
 using namespace std;
@@ -40,10 +41,10 @@ vector<string> split(const string &s, char delimiter)
 }
 
 //lodas the training data line by line and uses the last column as the label
-void loadTrainingSet(const double &bias)
+void loadTrainingSet(const double &bias, const bool isLabelLast, const int maxNum)
 {
 
-        string fullFilePath = R"(D:\QT-Projekte\KernelPerceptron\Dataset_NonLinear.txt)";
+        string fullFilePath = R"(D:\QT-Projekte\KernelPerceptron\mnist_train.csv)";
 
         cout << fullFilePath << endl;
         ifstream MyReadFile(fullFilePath);
@@ -61,27 +62,46 @@ void loadTrainingSet(const double &bias)
             // Output the text from the file
             vector<string> sample = split(text,',');
             vector<double> features;
+            double label;
 
-            for (int i = 0;i<sample.size()-1;i++)
+            if(isLabelLast)
             {
-                features.push_back(stod(sample[i]));
-                //cout << stod(sample[i]) << endl;
+                //Last number in line is treated as label
+                label = stod(sample[sample.size()-1]);
+                for (int i = 0;i<sample.size()-1;i++)
+                {
+                    features.push_back(stod(sample[i]));
+                    //cout << stod(sample[i]) << endl;
+                }
             }
+            else
+            {
+                label = stod(sample[0]);
+                for (int i = 1;i<sample.size();i++)
+                {
+                    features.push_back(stod(sample[i]));
+                    //cout << stod(sample[i]) << endl;
+                }
+            }
+
 
             features.push_back(bias);
 
-            //Last number in line is treated as label
-            double label = stod(sample[sample.size()-1]);
+
 
             Sample t(lineCount-1, features,label);
             trainingSet.push_back(t);
-            for(int i = 0;i<t.getFeatureVector().size()-1;i++)
+            /*for(int i = 0;i<t.getFeatureVector().size()-1;i++)
             {
                 cout<<t.getFeatureVector()[i] << " ";
 
-            }
-            cout << "Label:" << t.getLabel() << endl;
+            }*/
+            //cout << "Label:" << t.getLabel() << endl;
 
+            if(lineCount==maxNum)
+            {
+                break;
+            }
         }
 
 
@@ -90,7 +110,70 @@ void loadTrainingSet(const double &bias)
 
 }
 
+void oneVSall()
+{
+    map<double, vector<Sample>> trainingSets;
+    map<double, PerceptronClassifier> classifiers;
 
+    // Find all classes
+    for (const auto& s : trainingSet)
+    {
+        trainingSets[s.getLabel()];
+    }
+
+    // Create one binary dataset per class
+    for (auto& pair : trainingSets)
+    {
+        double targetClass = pair.first;
+
+        for (const auto& s : trainingSet)
+        {
+            double label = (s.getLabel() == targetClass) ? 1.0 : 0.0;
+
+            pair.second.emplace_back(s.getIdentifier(),s.getFeatureVector(),label);
+        }
+    }
+
+    for (const auto& pair : trainingSets)
+    {
+        cout << "Classifier for class " << pair.first
+             << ": " << pair.second.size()
+             << " samples" << endl;
+
+        kernel_linear k = kernel_linear();
+        PerceptronClassifier c = PerceptronClassifier(k);
+        //c.hyperParameterGridSearch(pair.second,pair.second,100,1,10,1);
+        c.train(pair.second,5000);
+        classifiers.emplace(pair.first, c);
+    }
+
+
+    double classification;
+    double maximumDistance = -1000;
+    double t;
+
+    for(int i =0;i<trainingSet.size();i++)
+    {
+        double maximumDistance = -1000;
+        for(auto &pair : classifiers)
+        {
+            t=pair.second.classify(trainingSet[i],false);
+            if(t > maximumDistance)
+            {
+                maximumDistance = t;
+                classification=pair.first;
+            }
+        }
+
+        cout << "Classification result:" << classification << "| True label:" << trainingSet[i].getLabel() << endl;
+
+    }
+
+
+
+
+
+}
 
 int main()
 {
@@ -109,19 +192,9 @@ int main()
 
     cout << "Totalcount:" << c.size() << endl;*/
 
-    std::cout << "Training started!" << std::endl;
-    loadTrainingSet(1);
-    kernel_linear linear = kernel_linear();
-    kernel_polynomial polynomial = kernel_polynomial(1);
-    kernel_rbf rbf = kernel_rbf(1);
-    kernel_sigmoid sigmoid = kernel_sigmoid(1,1);
-
-    PerceptronClassifier c = PerceptronClassifier(sigmoid);
-    //c.train(trainingSet,100);
-    c.hyperParameterGridSearch(trainingSet,trainingSet,25,-5,5,0.01);
-    cout << "Best a:" << c.getUsedKernel().getParameterVector()[0]<< endl;
-    cout << "Best c:" << c.getUsedKernel().getParameterVector()[1] << endl;
-    cout << "Accuracy: " << (c.calculateAccuracy(trainingSet)*100) << endl;
+    cout << "Loading training set" << endl;
+    loadTrainingSet(1, false,500);
+    oneVSall();
     getchar();
     return 0;
 }

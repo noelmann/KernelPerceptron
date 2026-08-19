@@ -25,7 +25,7 @@ void PerceptronClassifier::train(const std::vector<Sample> &trainingSamples, con
     {
         for (const auto& trainingSample : trainingSamples)
         {
-            double error = (trainingSample.getLabel()-classify(trainingSample));
+            double error = (trainingSample.getLabel()-classify(trainingSample,true));
             incrementPartialError(trainingSample,error);
         }
 
@@ -70,7 +70,7 @@ void PerceptronClassifier::hyperParameterGridSearch(const std::vector<Sample> &t
 
 
 //classifies a given sample using a dual form perceptron in combination with a given kernel(linear/polynomial/rbf)
-double PerceptronClassifier::classify(const Sample &t)
+double PerceptronClassifier::classify(const Sample &t, const bool &useActivationFunction)
 {
 
     double totalScalarProduct = 0.0;
@@ -80,7 +80,14 @@ double PerceptronClassifier::classify(const Sample &t)
     }
 
 
-    return heavisideFunction(totalScalarProduct);
+    if(useActivationFunction)
+    {
+        return heavisideFunction(totalScalarProduct);
+    }
+    else
+    {
+        return totalScalarProduct;
+    }
 
 }
 
@@ -115,7 +122,7 @@ bool PerceptronClassifier::checkIfClassifierIsPerfect()
 {
     for (const auto& entry : partialError)
     {
-        if (entry.first.getLabel() != classify(entry.first))
+        if (entry.first.getLabel() != classify(entry.first, true))
         {
             return false;
         }
@@ -151,7 +158,7 @@ double PerceptronClassifier::calculateAccuracy(const std::vector<Sample> &testse
     double correctCounter = 0;
     for(int i =0;i<testset.size();i++)
     {
-        if(classify(testset[i]) == testset[i].getLabel())
+        if(classify(testset[i],true) == testset[i].getLabel())
         {
             correctCounter++;
         }
