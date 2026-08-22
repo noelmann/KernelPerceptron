@@ -7,26 +7,30 @@
 #include "Sample.h"
 #include "kernel.h"
 #include <unordered_map>
-
+#include <omp.h>
+#include <map>
 
 class PerceptronClassifier
 {
 public:
-    PerceptronClassifier(kernel &kernel);
+    PerceptronClassifier(kernel &kernel, bool preComputeKernelMatrix = false);
     double classify(const Sample &t, const bool &useActivationFunction);
     void train(const std::vector<Sample> &trainingSamples, const int &max_iterations);
     void hyperParameterGridSearch(const std::vector<Sample> &trainingSamples,const std::vector<Sample> &developmentSamples, const int &max_iterations, double lowerBound, double upperBound, double stepSize);
     std::vector<std::pair<Sample,double>> partialError;
+    std::vector<double> kernelMatrix;
     int getIterations();
     double calculateAccuracy(const std::vector<Sample> &testset);
     kernel& getUsedKernel();
 private:
+    bool useKernelMatrix;
     double heavisideFunction(const double &x);
     double getPartialError(const Sample &t);
     void incrementPartialError(const Sample &t, const double e);
     bool checkIfClassifierIsPerfect();
     kernel &k;
     int iterations = 0;
+    void calculateKernelMatrix(const std::vector<Sample> &trainingSamples);
 
 };
 

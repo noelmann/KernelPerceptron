@@ -3,6 +3,8 @@ project(KernelPerceptron)
 
 set(CMAKE_CXX_STANDARD 20)
 
+find_package(OpenMP REQUIRED)
+
 add_executable(KernelPerceptron main.cpp
         Sample.cpp
         Sample.h
@@ -15,3 +17,5 @@ add_executable(KernelPerceptron main.cpp
         kernel_sigmoid.h kernel_sigmoid.cpp
         hyperparametergenerator.h hyperparametergenerator.cpp
 )
+
+target_link_libraries(KernelPerceptron PRIVATE OpenMP::OpenMP_CXX)

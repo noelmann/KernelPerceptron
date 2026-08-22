@@ -6,30 +6,49 @@
 #include <cmath>
 #include "hyperparametergenerator.h"
 
-PerceptronClassifier::PerceptronClassifier(kernel &kernel) : k(kernel)
+PerceptronClassifier::PerceptronClassifier(kernel &kernel, bool preComputeKernelMatrix) : k(kernel)
 {
     partialError.clear();
     iterations = 0;
+    useKernelMatrix = preComputeKernelMatrix;
 }
 
 void PerceptronClassifier::train(const std::vector<Sample> &trainingSamples, const int &max_iterations)
 {
     partialError.clear();
-    iterations = 0;
-    for (const auto& trainingSample : trainingSamples)
+    if(useKernelMatrix)
     {
-        partialError.push_back({trainingSample, 0.0});
+        calculateKernelMatrix(trainingSamples);
+    }
+    iterations = 0;
+    for (int i = 0;i<trainingSamples.size();i++)
+    {
+        partialError.push_back({trainingSamples[i], 0.0});
     }
 
-    while (!checkIfClassifierIsPerfect() && iterations < max_iterations)
+    while (iterations < max_iterations)
     {
-        for (const auto& trainingSample : trainingSamples)
+        bool perfect = true;
+        double totalError = 0.0;
+
+        for (int e=0;e<partialError.size();e++)
         {
-            double error = (trainingSample.getLabel()-classify(trainingSample,true));
-            incrementPartialError(trainingSample,error);
+            double error = (partialError[e].first.getLabel()-classify(partialError[e].first,true));
+            partialError[e].second += error;
+            if(error != 0.0)
+            {
+                perfect = false;
+            }
         }
 
-        iterations++;
+
+            iterations++;
+
+            if(perfect)
+            {
+                break;
+            }
+
     }
 }
 
@@ -74,10 +93,23 @@ double PerceptronClassifier::classify(const Sample &t, const bool &useActivation
 {
 
     double totalScalarProduct = 0.0;
-    for (const auto& entry : partialError)
+
+    for (int i =0;i<partialError.size();i++)
     {
-        totalScalarProduct+= getPartialError(entry.first)*(k.getScalarProduct(entry.first.getFeatureVector(),t.getFeatureVector()));
+
+        //looks up the scalar product in the kernel matrix if it exists and the matrix is to be used
+        if(useKernelMatrix && t.getIdentifier() < kernelMatrix.size())
+        {
+            int index= partialError[i].first.getIdentifier()*partialError.size()+t.getIdentifier();
+            totalScalarProduct+= partialError[i].second*kernelMatrix[index];
+        }
+        else
+        {
+
+            totalScalarProduct+= partialError[i].second*k.getScalarProduct(t.getFeatureVector(),partialError[i].first.getFeatureVector());
+        }
     }
+
 
 
     if(useActivationFunction)
@@ -153,6 +185,23 @@ kernel& PerceptronClassifier::getUsedKernel()
     return k;
 }
 
+//precomputes the kernelMatrix in parallel
+void PerceptronClassifier::calculateKernelMatrix(const std::vector<Sample> &trainingSamples)
+{
+    kernelMatrix.resize(trainingSamples.size()*trainingSamples.size());
+#pragma omp parallel for
+    for(int i = 0;i<trainingSamples.size();i++)
+    {
+        for(int j = 0;j<trainingSamples.size();j++)
+        {
+            int index = i*trainingSamples.size()+j;
+
+            kernelMatrix[index]=k.getScalarProduct(trainingSamples[i].getFeatureVector(),trainingSamples[j].getFeatureVector());
+        }
+    }
+}
+
+//calculates the accuracy of a single perceptron on a given testset
 double PerceptronClassifier::calculateAccuracy(const std::vector<Sample> &testset)
 {
     double correctCounter = 0;

@@ -12,6 +12,7 @@
 #include "kernel_linear.h"
 #include "hyperparametergenerator.h"
 #include <map>
+#include <omp.h>
 
 
 using namespace std;
@@ -49,12 +50,12 @@ void loadTrainingSet(const double &bias, const bool isLabelLast, const int maxNu
         cout << fullFilePath << endl;
         ifstream MyReadFile(fullFilePath);
         string text;
-        int lineCount = 0;
+        int lineCount = -1;
         // Use a while loop together with the getline() function to read the file line by line
         while (getline (MyReadFile, text))
         {
             lineCount++;
-            if (lineCount == 1)
+            if (lineCount == 0)
             {
                 //skips header line
                 continue;
@@ -98,10 +99,12 @@ void loadTrainingSet(const double &bias, const bool isLabelLast, const int maxNu
             }*/
             //cout << "Label:" << t.getLabel() << endl;
 
-            if(lineCount==maxNum)
+            if(maxNum > 0 && lineCount==maxNum)
             {
-                break;
+                    break;
+
             }
+
         }
 
 
@@ -114,11 +117,20 @@ void oneVSall()
 {
     map<double, vector<Sample>> trainingSets;
     map<double, PerceptronClassifier> classifiers;
+    vector<double> labels;
+    vector<kernel_linear> kernels;
 
     // Find all classes
     for (const auto& s : trainingSet)
     {
         trainingSets[s.getLabel()];
+    }
+
+    for(const auto &s: trainingSets)
+    {
+        labels.emplace_back(s.first);
+        kernel_linear k = kernel_linear();
+        kernels.emplace_back(k);
     }
 
     // Create one binary dataset per class
@@ -134,27 +146,38 @@ void oneVSall()
         }
     }
 
-    for (const auto& pair : trainingSets)
-    {
-        cout << "Classifier for class " << pair.first
-             << ": " << pair.second.size()
-             << " samples" << endl;
+    cout << "Started training of classifiers" << endl;
 
-        kernel_linear k = kernel_linear();
-        PerceptronClassifier c = PerceptronClassifier(k);
+
+    #pragma omp parallel for
+
+    for (int i = 0;i<labels.size();i++)
+    {
+        const auto & samples = trainingSets.at(labels[i]);
+
+        PerceptronClassifier c = PerceptronClassifier(kernels.at(i),true);
         //c.hyperParameterGridSearch(pair.second,pair.second,100,1,10,1);
-        c.train(pair.second,5000);
-        classifiers.emplace(pair.first, c);
+        c.train(samples,5);
+    #pragma omp critical
+        {
+            classifiers.emplace(labels[i], c);
+            cout << "Classifier trained for class " << labels[i]
+                 << ": " << samples.size()
+                 << " samples" << endl;
+        }
+
     }
 
 
-    double classification;
-    double maximumDistance = -1000;
-    double t;
 
+    cout << "Testing" << endl;
+    int correct = 0;
+#pragma omp parallel for reduction(+:correct)
     for(int i =0;i<trainingSet.size();i++)
     {
+        double classification;
         double maximumDistance = -1000;
+        double t;
         for(auto &pair : classifiers)
         {
             t=pair.second.classify(trainingSet[i],false);
@@ -165,9 +188,21 @@ void oneVSall()
             }
         }
 
-        cout << "Classification result:" << classification << "| True label:" << trainingSet[i].getLabel() << endl;
+        //cout << "Classification result:" << classification << "| True label:" << trainingSet[i].getLabel() << endl;
+
+        {
+        if(classification == trainingSet[i].getLabel())
+        {
+            correct++;
+            //cout << "Correct" << endl;
+        }
+        //else
+            //cout << "False" << endl;
+        }
 
     }
+
+     cout << "Accuracy:" << (double)correct/trainingSet.size() << endl;
 
 
 
@@ -193,7 +228,7 @@ int main()
     cout << "Totalcount:" << c.size() << endl;*/
 
     cout << "Loading training set" << endl;
-    loadTrainingSet(1, false,500);
+    loadTrainingSet(1, false,5000);
     oneVSall();
     getchar();
     return 0;
