@@ -24,6 +24,7 @@ public:
     kernel& getUsedKernel();
 private:
     bool useKernelMatrix;
+    int maxKernelMatrixSize = 5000*5000;
     double heavisideFunction(const double &x);
     double getPartialError(const Sample &t);
     void incrementPartialError(const Sample &t, const double e);

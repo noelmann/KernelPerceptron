@@ -228,7 +228,7 @@ int main()
     cout << "Totalcount:" << c.size() << endl;*/
 
     cout << "Loading training set" << endl;
-    loadTrainingSet(1, false,5000);
+    loadTrainingSet(1, false,1000);
     oneVSall();
     getchar();
     return 0;

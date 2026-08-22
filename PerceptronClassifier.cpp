@@ -93,14 +93,15 @@ double PerceptronClassifier::classify(const Sample &t, const bool &useActivation
 {
 
     double totalScalarProduct = 0.0;
+    double matrixDimension = (sqrt(kernelMatrix.size()));
 
     for (int i =0;i<partialError.size();i++)
     {
 
         //looks up the scalar product in the kernel matrix if it exists and the matrix is to be used
-        if(useKernelMatrix && t.getIdentifier() < kernelMatrix.size())
+        if (useKernelMatrix && partialError[i].first.getIdentifier() < matrixDimension && t.getIdentifier() < matrixDimension)
         {
-            int index= partialError[i].first.getIdentifier()*partialError.size()+t.getIdentifier();
+            int index= partialError[i].first.getIdentifier()*matrixDimension+t.getIdentifier();
             totalScalarProduct+= partialError[i].second*kernelMatrix[index];
         }
         else
@@ -188,13 +189,25 @@ kernel& PerceptronClassifier::getUsedKernel()
 //precomputes the kernelMatrix in parallel
 void PerceptronClassifier::calculateKernelMatrix(const std::vector<Sample> &trainingSamples)
 {
-    kernelMatrix.resize(trainingSamples.size()*trainingSamples.size());
-#pragma omp parallel for
-    for(int i = 0;i<trainingSamples.size();i++)
+
+
+    int max_i = trainingSamples.size();
+    int max_j = trainingSamples.size();
+    if(maxKernelMatrixSize < trainingSamples.size()*trainingSamples.size())
     {
-        for(int j = 0;j<trainingSamples.size();j++)
+        max_i=(sqrt(maxKernelMatrixSize));
+
+        max_j=max_i;
+    }
+
+    kernelMatrix.resize(max_i*max_j);
+#pragma omp parallel for
+    for(int i = 0;i<max_i;i++)
+    {
+        for(int j = 0;j<max_j;j++)
         {
-            int index = i*trainingSamples.size()+j;
+
+            int index = i*max_j+j;
 
             kernelMatrix[index]=k.getScalarProduct(trainingSamples[i].getFeatureVector(),trainingSamples[j].getFeatureVector());
         }
