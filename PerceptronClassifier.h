@@ -9,29 +9,32 @@
 #include <unordered_map>
 #include <omp.h>
 #include <map>
+#include "KernelMatrix.h"
 
 class PerceptronClassifier
 {
 public:
-    PerceptronClassifier(kernel &kernel, bool preComputeKernelMatrix = false);
-    double classify(const Sample &t, const bool &useActivationFunction);
-    void train(const std::vector<Sample> &trainingSamples, const int &max_iterations);
-    void hyperParameterGridSearch(const std::vector<Sample> &trainingSamples,const std::vector<Sample> &developmentSamples, const int &max_iterations, double lowerBound, double upperBound, double stepSize);
+    PerceptronClassifier(KernelMatrix &kernelMatrix, double positiveClassLabel);
+
+    double classify(Sample &t, bool useActivationFunction = true, bool trainingPhase = false);
+    void train(std::vector<Sample> &trainingSamples, int max_iterations);
+
+    //void hyperParameterGridSearch(const std::vector<Sample> &trainingSamples,const std::vector<Sample> &developmentSamples, const int &max_iterations, double lowerBound, double upperBound, double stepSize);
     std::vector<std::pair<Sample,double>> partialError;
-    std::vector<double> kernelMatrix;
+    double getPositiveClassLabel();
     int getIterations();
-    double calculateAccuracy(const std::vector<Sample> &testset);
-    kernel& getUsedKernel();
+
+    //kernel& getUsedKernel();
 private:
-    bool useKernelMatrix;
-    int maxKernelMatrixSize = 5000*5000;
-    double heavisideFunction(const double &x);
-    double getPartialError(const Sample &t);
-    void incrementPartialError(const Sample &t, const double e);
-    bool checkIfClassifierIsPerfect();
-    kernel &k;
+    double heavisideFunction(double &x);
+    double calculateAccuracy(std::vector<Sample> &testset);
+    //double getPartialError(const Sample &t);
+    //void incrementPartialError(const Sample &t, const double e);
+    //bool checkIfClassifierIsPerfect();
     int iterations = 0;
-    void calculateKernelMatrix(const std::vector<Sample> &trainingSamples);
+    double positiveClassLabel;
+    KernelMatrix &usedKernelMatrix;
+
 
 };
 

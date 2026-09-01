@@ -16,6 +16,8 @@ add_executable(KernelPerceptron main.cpp
         kernel.h
         kernel_sigmoid.h kernel_sigmoid.cpp
         hyperparametergenerator.h hyperparametergenerator.cpp
+        kernelmatrix.h kernelmatrix.cpp
+        classifierbuilder.h classifierbuilder.cpp
 )
 
 target_link_libraries(KernelPerceptron PRIVATE OpenMP::OpenMP_CXX)

@@ -13,6 +13,8 @@
 #include "hyperparametergenerator.h"
 #include <map>
 #include <omp.h>
+#include "KernelMatrix.h"
+#include "classifierbuilder.h"
 
 
 using namespace std;
@@ -46,6 +48,7 @@ void loadTrainingSet(const double &bias, const bool isLabelLast, const int maxNu
 {
 
         string fullFilePath = R"(D:\QT-Projekte\KernelPerceptron\mnist_train.csv)";
+        //string fullFilePath = R"(D:\QT-Projekte\KernelPerceptron\Dataset_NonLinear.txt)";
 
         cout << fullFilePath << endl;
         ifstream MyReadFile(fullFilePath);
@@ -113,12 +116,12 @@ void loadTrainingSet(const double &bias, const bool isLabelLast, const int maxNu
 
 }
 
-void oneVSall()
+/*void oneVSall()
 {
     map<double, vector<Sample>> trainingSets;
     map<double, PerceptronClassifier> classifiers;
     vector<double> labels;
-    vector<kernel_linear> kernels;
+    vector<kernel_polynomial> kernels;
 
     // Find all classes
     for (const auto& s : trainingSet)
@@ -129,7 +132,8 @@ void oneVSall()
     for(const auto &s: trainingSets)
     {
         labels.emplace_back(s.first);
-        kernel_linear k = kernel_linear();
+        //kernel_linear k = kernel_linear();
+        kernel_polynomial k = kernel_polynomial(2);
         kernels.emplace_back(k);
     }
 
@@ -208,7 +212,7 @@ void oneVSall()
 
 
 
-}
+}*/
 
 int main()
 {
@@ -228,8 +232,24 @@ int main()
     cout << "Totalcount:" << c.size() << endl;*/
 
     cout << "Loading training set" << endl;
-    loadTrainingSet(1, false,1000);
-    oneVSall();
+    loadTrainingSet(1, false,10000);
+    //kernel_linear k = kernel_linear();
+    //oneVSall();
+
+    //KernelMatrix kMatrix = KernelMatrix();
+    //kMatrix.calculateKernelMatrix(trainingSet,k);
+    kernel_linear linear;
+    kernel_sigmoid sigmoid = kernel_sigmoid(1,3);
+    kernel_polynomial polynomial = kernel_polynomial(2);
+    ClassifierBuilder builder = ClassifierBuilder(trainingSet,polynomial,3,10000*10000);
+    std::cout << builder.calculateAccuracy(trainingSet) << std::endl;
+    /*for(int i = 0;i<trainingSet.size();i++)
+    {
+        std::cout << "Classified as:" << builder.classifySample(trainingSet[i]) << std::endl;
+        std::cout << "True Label:" << trainingSet[i].getLabel() << std::endl;
+    }*/
+
+
     getchar();
     return 0;
 }
